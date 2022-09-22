@@ -1,0 +1,30 @@
+{
+  "name": "multidialogo/api-php-sdk",
+  "description": "php client for multidialogo services",
+  "keywords": [
+    "multidialogo-api",
+    "php",
+    "sdk"
+  ],
+  "require": {
+    "php": ">=7.4",
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "^6.5"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "multidialogo\\client\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "files": ["test/autoload.php"],
+    "psr-4": {
+      "multidialogo\\client\\test\\": "test/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  }
+}
