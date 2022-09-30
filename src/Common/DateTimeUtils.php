@@ -10,7 +10,7 @@ class DateTimeUtils
     const DATETIME_ISO8601_UTC_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     /** @noinspection PhpUnhandledExceptionInspection */
-    public static function utcNow()
+    public static function utcNow(): DateTimeImmutable
     {
         return new DateTimeImmutable('now', new DateTimeZone('UTC'));
     }

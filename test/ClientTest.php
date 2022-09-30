@@ -2,6 +2,7 @@
 
 namespace multidialogo\client\test;
 
+use multidialogo\client\Exception\MultidialogoClientException;
 use multidialogo\client\MultidialogoClient;
 use PHPUnit\Framework\TestCase;
 
@@ -24,5 +25,15 @@ class ClientTest extends TestCase
         return MultidialogoClient::builder()
             ->withHostUrl('http://rest.multidialogo.local')
             ->withPasswordCredentials('admin', 'beta_12344');
+    }
+
+    public function testShouldThrowExceptionIfLanguageNotSetted()
+    {
+        $client = $this->getDefaultBuilder()->build();
+
+        $this->expectException(MultidialogoClientException::class);
+        $this->expectExceptionMessage('Language property not setted!');
+
+        $client->getJson('products', null);
     }
 }
