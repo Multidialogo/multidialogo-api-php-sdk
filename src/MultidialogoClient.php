@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class MultidialogoClient
 {
-    private static MultidialogoClient $instance;
+    private static ?MultidialogoClient $instance = null;
 
     private HttpClient $httpClient;
 
@@ -21,7 +21,7 @@ class MultidialogoClient
 
     private array $headers;
 
-    private ?string $language;
+    private ?string $language = null;
 
     /**
      * RestClient constructor.
@@ -32,10 +32,9 @@ class MultidialogoClient
      */
     public function __construct(HttpClient $httpClient, AuthProvider $authProvider, array $headers)
     {
-        $this->authProvider = $authProvider;
         $this->httpClient = $httpClient;
+        $this->authProvider = $authProvider;
         $this->headers = $headers;
-        $this->language = null;
     }
 
     public static function builder(): MultidialogoClientBuilder
