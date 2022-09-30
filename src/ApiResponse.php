@@ -8,31 +8,22 @@ use Psr\Http\Message\ResponseInterface;
 
 class ApiResponse
 {
-    /**
-     * @var int
-     */
-    public $statusCode;
+    public int $statusCode;
 
     /**
      * @var mixed
      */
     public $body;
 
-    /**
-     * @var ResponseInterface
-     */
-    public $httpResponse;
+    public ResponseInterface $httpResponse;
 
-    /**
-     * @var bool
-     */
-    public $ok;
+    public bool $ok;
 
     /**
      * @param ResponseInterface $response
      * @return ApiResponse
      */
-    public static function fromJsonResponse(ResponseInterface $response)
+    public static function fromJsonResponse(ResponseInterface $response): ApiResponse
     {
         $result = new self();
         $bodyString = $response->getBody()->__toString();

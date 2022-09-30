@@ -11,80 +11,58 @@ use multidialogo\client\Auth\TokenStorageInterface;
 
 class MultidialogoClientBuilder
 {
-    /**
-     * @var string
-     */
-    private $username;
+    private string $username;
 
-    /**
-     * @var string
-     */
-    private $password;
+    private string $password;
 
-    /**
-     * @var string
-     */
-    private $hostUrl;
+    private string $hostUrl;
 
-    /**
-     * @var TokenStorageInterface
-     */
-    private $tokenStorage;
+    private ?TokenStorageInterface $tokenStorage = null;
 
-    /**
-     * @var string
-     */
-    private $apiVersion = '0.0.1';
+    private string $apiVersion = '0.0.1';
 
     /**
      * @var callable $httpClientFactory
      */
     private $httpClientFactory;
 
-    /**
-     * @var array $headers
-     */
-    private $headers;
+    private array $headers = [];
 
-    /**
-     * @param string $username
-     * @param string $password
-     * @return MultidialogoClientBuilder
-     */
-    public function withPasswordCredentials($username, $password)
+    private ?string $language = null;
+
+    public function withPasswordCredentials(string $username, string $password): self
     {
         $this->username = $username;
         $this->password = $password;
+
         return $this;
     }
 
-    /**
-     * @param string $hostUrl
-     * @return MultidialogoClientBuilder
-     */
-    public function withHostUrl($hostUrl)
+    public function withHostUrl(string $hostUrl): self
     {
         $this->hostUrl = $hostUrl;
+
         return $this;
     }
 
-    /**
-     * @param string $apiVersion
-     * @return MultidialogoClientBuilder
-     */
-    public function withApiVersion($apiVersion)
+    public function withApiVersion(string $apiVersion): self
     {
         $this->apiVersion = $apiVersion;
+
         return $this;
     }
 
-    /**
-     * @param TokenStorageInterface $tokenStorage
-     * @return MultidialogoClientBuilder
-     */
-    public function withTokenStorage($tokenStorage)
+    public function withLanguage(string $language): self
+    {
+        $this->language = $language;
+
+        return $this;
+    }
+
+    public function withTokenStorage(TokenStorageInterface $tokenStorage): self
     {
         $this->tokenStorage = $tokenStorage;
+
         return $this;
     }
 
@@ -92,26 +70,21 @@ class MultidialogoClientBuilder
      * @param callable $httpClientFactory
      * @return MultidialogoClientBuilder
      */
-    public function withHttpClientFactory($httpClientFactory)
+    public function withHttpClientFactory($httpClientFactory): self
     {
         $this->httpClientFactory = $httpClientFactory;
+
         return $this;
     }
 
-    /**
-     * @param array $headers
-     * @return MultidialogoClientBuilder
-     */
-    public function withAdditionalHeaders($headers)
+    public function withAdditionalHeaders(array $headers): self
     {
         $this->headers = $headers;
+
         return $this;
     }
 
-    /**
-     * @return MultidialogoClient
-     */
-    public function build()
+    public function build(): MultidialogoClient
     {
         $httpClientFactory = $this->httpClientFactory;
         if (!$httpClientFactory) {
@@ -131,8 +104,13 @@ class MultidialogoClientBuilder
             $httpClient,
             $tokenStorage,
             $this->username,
-            $this->password);
+            $this->password
+        );
 
-        return new MultidialogoClient($httpClient, $authProvider, $this->headers ?: []);
+        $client = new MultidialogoClient($httpClient, $authProvider, $this->headers);
+
+        $client->setLanguage($this->language);
+
+        return $client;
     }
 }

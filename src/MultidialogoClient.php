@@ -13,59 +13,50 @@ use Psr\Http\Message\ResponseInterface;
 
 class MultidialogoClient
 {
-    /**
-     * @var MultidialogoClient
-     */
-    private static $instance;
+    private static MultidialogoClient $instance;
 
-    /**
-     * @var HttpClient
-     */
-    private $httpClient;
+    private HttpClient $httpClient;
 
-    /**
-     * @var AuthProvider
-     */
-    private $authProvider;
+    private AuthProvider $authProvider;
 
-    /**
-     * @var array
-     */
-    private $headers;
+    private array $headers;
+
+    private ?string $language;
 
     /**
      * RestClient constructor.
      * @param HttpClient $httpClient a pre-configured HttpClient, the base_uri should point to the base api uri,
      *                               comprising the api version. ex: http://rest.multidialogo.it/api/v0.0.1/
      * @param AuthProvider $authProvider
+     * @param array $headers additional headers
      */
-    public function __construct($httpClient, $authProvider, $headers)
+    public function __construct(HttpClient $httpClient, AuthProvider $authProvider, array $headers)
     {
         $this->authProvider = $authProvider;
         $this->httpClient = $httpClient;
         $this->headers = $headers;
+        $this->language = null;
     }
 
-    /**
-     * @return MultidialogoClientBuilder
-     */
-    public static function builder()
+    public static function builder(): MultidialogoClientBuilder
     {
         return new MultidialogoClientBuilder();
     }
 
     /**
-     * @return MultidialogoClient
+     * @param string|null $language
      */
-    public static function getInstance()
+    public function setLanguage(?string $language): void
+    {
+        $this->language = $language;
+    }
+
+    public static function getInstance(): MultidialogoClient
     {
         return static::$instance;
     }
 
-    /**
-     * @param MultidialogoClient $multidialogoClientInstance
-     */
-    public static function setInstance($multidialogoClientInstance)
+    public static function setInstance(MultidialogoClient $multidialogoClientInstance)
     {
         static::$instance = $multidialogoClientInstance;
     }
@@ -78,9 +69,10 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function postJson($urlPath, $body, $queryParams = null, &$response = null)
+    public function postJson($urlPath, $body, $queryParams = null, &$response = null): ApiResponse
     {
         $response = $this->_doRequest('POST', $urlPath, $queryParams, json_encode($body));
+
         return ApiResponse::fromJsonResponse($response);
     }
 
@@ -93,14 +85,19 @@ class MultidialogoClient
      * @throws Exception
      * @noinspection PhpDocMissingThrowsInspection
      */
-    private function _doRequest($method, $url, $queryParams = null, $body = null)
+    private function _doRequest($method, $url, $queryParams = null, $body = null): ResponseInterface
     {
+        if (!$this->language) {
+            throw new MultidialogoClientException('Language property not setted!');
+        }
+
         $options = [
             RequestOptions::HEADERS => array_merge(
                 [
                     'Authorization' => "Bearer {$this->authProvider->getToken()}",
                     'Content-Type' => 'application/vnd.api+json',
-                    'Accept' => 'application/vnd.api+json'
+                    'Accept' => 'application/vnd.api+json',
+                    'Accept-Language' => $this->language,
                 ],
                 $this->headers
             ),
@@ -118,6 +115,7 @@ class MultidialogoClient
             return $this->httpClient->request($method, $url, $options);
         } catch (ClientException $e) {
             $responseBody = $e->getResponse()->getBody()->getContents();
+
             throw new MultidialogoClientException("Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
         } catch (Exception $e) {
             throw new MultidialogoClientException("Request error. {$e->getMessage()}", $e);
@@ -135,6 +133,7 @@ class MultidialogoClient
     public function patchJson($urlPath, $body, $queryParams = null, &$response = null)
     {
         $response = $this->_doRequest('PATCH', $urlPath, $queryParams, json_encode($body));
+
         return ApiResponse::fromJsonResponse($response);
     }
 
@@ -145,9 +144,10 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function getJson($urlPath, $queryParams = null, &$response = null)
+    public function getJson($urlPath, $queryParams = null, &$response = null): ApiResponse
     {
         $response = $this->_doRequest('GET', $urlPath, $queryParams);
+
         return ApiResponse::fromJsonResponse($response);
     }
 
@@ -158,24 +158,19 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function deleteJson($urlPath, $queryParams = null, &$response = null)
+    public function deleteJson($urlPath, $queryParams = null, &$response = null): ApiResponse
     {
         $response = $this->_doRequest('DELETE', $urlPath, $queryParams);
+
         return ApiResponse::fromJsonResponse($response);
     }
 
-    /**
-     * @return string
-     */
-    public function getBaseUri()
+    public function getBaseUri(): string
     {
         return $this->httpClient->getConfig('base_uri')->__toString();
     }
 
-    /**
-     * @return AuthProvider
-     */
-    public function getAuthProvider()
+    public function getAuthProvider(): AuthProvider
     {
         return $this->authProvider;
     }
