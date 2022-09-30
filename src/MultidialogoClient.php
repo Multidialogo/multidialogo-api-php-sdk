@@ -50,7 +50,7 @@ class MultidialogoClient
         $this->language = $language;
     }
 
-    public static function getInstance(): MultidialogoClient
+    public static function getInstance(): ?MultidialogoClient
     {
         return static::$instance;
     }
