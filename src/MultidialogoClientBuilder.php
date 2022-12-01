@@ -8,29 +8,32 @@ use GuzzleHttp\Client as HttpClient;
 use InvalidArgumentException;
 use multidialogo\client\Auth\AuthProvider;
 use multidialogo\client\Auth\FileTokenStorage;
+use multidialogo\client\Auth\TokenWrapper;
 use multidialogo\client\Auth\VolatileTokenStorage;
 use multidialogo\client\Auth\TokenStorageInterface;
 
 class MultidialogoClientBuilder
 {
-    private string $username;
+    private $hostUrl;
 
-    private string $password;
+    private $username;
 
-    private string $hostUrl;
+    private $password;
 
-    private ?TokenStorageInterface $tokenStorage = null;
+    private $token;
 
-    private string $apiVersion = '0.0.1';
+    private $tokenStorage = null;
+
+    private $apiVersion = '0.0.1';
 
     /**
      * @var callable $httpClientFactory
      */
     private $httpClientFactory;
 
-    private array $headers = [];
+    private $headers = [];
 
-    private ?string $language = null;
+    private $language = null;
 
     public function withPasswordCredentials(string $username, string $password): self
     {
@@ -93,14 +96,17 @@ class MultidialogoClientBuilder
         return $this;
     }
 
+    public function withBearerToken($token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
     public function build(): MultidialogoClient
     {
         if (!$this->hostUrl) {
             throw new InvalidArgumentException("Missing hostUrl property");
-        }
-
-        if (!$this->apiVersion) {
-            throw new InvalidArgumentException("Missing apiVersion property");
         }
 
         $httpClientFactory = $this->httpClientFactory;
@@ -117,12 +123,16 @@ class MultidialogoClientBuilder
             $tokenStorage = new VolatileTokenStorage();
         }
 
-        $authProvider = new AuthProvider(
-            $httpClient,
-            $tokenStorage,
-            $this->username,
-            $this->password
-        );
+        if ($this->token) {
+            $authProvider = new TokenWrapper($this->token);
+        } else {
+            $authProvider = new AuthProvider(
+                $httpClient,
+                $tokenStorage,
+                $this->username,
+                $this->password
+            );
+        }
 
         $client = new MultidialogoClient($httpClient, $authProvider, $this->headers);
 

@@ -7,30 +7,33 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use multidialogo\client\Auth\AuthProvider;
+use multidialogo\client\Auth\AuthProviderInterface;
 use multidialogo\client\Exception\MultidialogoClientException;
 use Psr\Http\Message\ResponseInterface;
 
 
 class MultidialogoClient
 {
-    private static ?MultidialogoClient $instance = null;
+    private static $instance = null;
 
-    private HttpClient $httpClient;
+    private $httpClient;
 
-    private AuthProvider $authProvider;
+    private $authProvider;
 
-    private array $headers;
+    private $headers;
 
-    private ?string $language = null;
+    private $language = null;
+
+    private $options;
 
     /**
      * RestClient constructor.
      * @param HttpClient $httpClient a pre-configured HttpClient, the base_uri should point to the base api uri,
      *                               comprising the api version. ex: http://rest.multidialogo.it/api/v0.0.1/
-     * @param AuthProvider $authProvider
+     * @param AuthProviderInterface $authProvider
      * @param array $headers additional headers
      */
-    public function __construct(HttpClient $httpClient, AuthProvider $authProvider, array $headers)
+    public function __construct($httpClient, $authProvider, $headers)
     {
         $this->httpClient = $httpClient;
         $this->authProvider = $authProvider;
@@ -45,12 +48,12 @@ class MultidialogoClient
     /**
      * @param string|null $language
      */
-    public function setLanguage(?string $language): void
+    public function setLanguage($language)
     {
         $this->language = $language;
     }
 
-    public static function getInstance(): ?MultidialogoClient
+    public static function getInstance()
     {
         return static::$instance;
     }
@@ -68,7 +71,7 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function postJson($urlPath, $body, $queryParams = null, &$response = null): ApiResponse
+    public function postJson($urlPath, $body, $queryParams = null, &$response = null)
     {
         $response = $this->_doRequest('POST', $urlPath, $queryParams, json_encode($body));
 
@@ -84,13 +87,13 @@ class MultidialogoClient
      * @throws Exception
      * @noinspection PhpDocMissingThrowsInspection
      */
-    private function _doRequest($method, $url, $queryParams = null, $body = null): ResponseInterface
+    private function _doRequest($method, $url, $queryParams = null, $body = null)
     {
         if (!$this->language) {
             throw new MultidialogoClientException('Language property not setted!');
         }
 
-        $options = [
+        $this->options = [
             RequestOptions::HEADERS => array_merge(
                 [
                     'Authorization' => "Bearer {$this->authProvider->getToken()}",
@@ -103,15 +106,15 @@ class MultidialogoClient
         ];
 
         if ($queryParams) {
-            $options[RequestOptions::QUERY] = $queryParams;
+            $this->options[RequestOptions::QUERY] = $queryParams;
         }
 
         if ($body) {
-            $options[RequestOptions::BODY] = $body;
+            $this->options[RequestOptions::BODY] = $body;
         }
 
         try {
-            return $this->httpClient->request($method, $url, $options);
+            return $this->httpClient->request($method, $url, $this->options);
         } catch (ClientException $e) {
             $responseBody = $e->getResponse()->getBody()->getContents();
 
@@ -143,7 +146,7 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function getJson($urlPath, $queryParams = null, &$response = null): ApiResponse
+    public function getJson($urlPath, $queryParams = null, &$response = null)
     {
         $response = $this->_doRequest('GET', $urlPath, $queryParams);
 
@@ -157,20 +160,28 @@ class MultidialogoClient
      * @return ApiResponse
      * @throws Exception
      */
-    public function deleteJson($urlPath, $queryParams = null, &$response = null): ApiResponse
+    public function deleteJson($urlPath, $queryParams = null, &$response = null)
     {
         $response = $this->_doRequest('DELETE', $urlPath, $queryParams);
 
         return ApiResponse::fromJsonResponse($response);
     }
 
-    public function getBaseUri(): string
+    public function getBaseUri()
     {
         return $this->httpClient->getConfig('base_uri')->__toString();
     }
 
-    public function getAuthProvider(): AuthProvider
+    public function getAuthProvider()
     {
         return $this->authProvider;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastRequestHeaders()
+    {
+        return $this->options[RequestOptions::HEADERS];
     }
 }
