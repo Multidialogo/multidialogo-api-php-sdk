@@ -11,7 +11,7 @@ use GuzzleHttp\RequestOptions;
 use multidialogo\client\Common\DateTimeUtils;
 use multidialogo\client\Exception\MultidialogoClientException;
 
-class AuthProvider
+class AuthProvider implements AuthProviderInterface
 {
     /**
      * @var HttpClient
