@@ -66,7 +66,7 @@ class AuthProvider
     {
         if (!$this->authToken) {
             // try get a token from the storage
-            $this->tokenStorage->read($this->authToken, $this->refreshToken);
+            $this->tokenStorage->read($this->username, $this->authToken, $this->refreshToken);
         }
 
         if (!$this->authToken || !$this->authToken->isValid()) {
@@ -130,7 +130,7 @@ class AuthProvider
             DateTimeUtils::fromUtcString($data->refreshTokenExpireAt)
         );
 
-        $this->tokenStorage->write($this->authToken, $this->refreshToken);
+        $this->tokenStorage->write($this->username, $this->authToken, $this->refreshToken);
     }
 
     /**

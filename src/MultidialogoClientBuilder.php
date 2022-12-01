@@ -5,8 +5,10 @@ namespace multidialogo\client;
 
 
 use GuzzleHttp\Client as HttpClient;
+use InvalidArgumentException;
 use multidialogo\client\Auth\AuthProvider;
-use multidialogo\client\Auth\InMemoryTokenStorage;
+use multidialogo\client\Auth\FileTokenStorage;
+use multidialogo\client\Auth\VolatileTokenStorage;
 use multidialogo\client\Auth\TokenStorageInterface;
 
 class MultidialogoClientBuilder
@@ -66,6 +68,13 @@ class MultidialogoClientBuilder
         return $this;
     }
 
+    public function withFileTokenStorage($basePath): self
+    {
+        $this->tokenStorage = new FileTokenStorage($basePath);
+
+        return $this;
+    }
+
     /**
      * @param callable $httpClientFactory
      * @return MultidialogoClientBuilder
@@ -86,6 +95,14 @@ class MultidialogoClientBuilder
 
     public function build(): MultidialogoClient
     {
+        if (!$this->hostUrl) {
+            throw new InvalidArgumentException("Missing hostUrl property");
+        }
+
+        if (!$this->apiVersion) {
+            throw new InvalidArgumentException("Missing apiVersion property");
+        }
+
         $httpClientFactory = $this->httpClientFactory;
         if (!$httpClientFactory) {
             $httpClientFactory = function ($baseUri) {
@@ -97,7 +114,7 @@ class MultidialogoClientBuilder
 
         $tokenStorage = $this->tokenStorage;
         if (!$tokenStorage) {
-            $tokenStorage = new InMemoryTokenStorage();
+            $tokenStorage = new VolatileTokenStorage();
         }
 
         $authProvider = new AuthProvider(

@@ -4,7 +4,7 @@
 namespace multidialogo\client\Auth;
 
 
-class InMemoryTokenStorage implements TokenStorageInterface
+class VolatileTokenStorage implements TokenStorageInterface
 {
     /**
      * @var AuthToken
@@ -16,13 +16,13 @@ class InMemoryTokenStorage implements TokenStorageInterface
      */
     private $refreshToken;
 
-    function read(&$mainToken, &$refreshToken)
+    function read($userName, &$mainToken, &$refreshToken)
     {
         $mainToken = $this->mainToken;
         $refreshToken = $this->refreshToken;
     }
 
-    function write($mainToken, $refreshToken)
+    function write($userName, $mainToken, $refreshToken)
     {
         $this->mainToken = $mainToken;
         $this->refreshToken = $refreshToken;

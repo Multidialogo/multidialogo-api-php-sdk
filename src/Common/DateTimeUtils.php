@@ -20,6 +20,14 @@ class DateTimeUtils
      */
     public static function fromUtcString($dateString)
     {
-        return DateTimeImmutable::createFromFormat($dateString, static::DATETIME_ISO8601_UTC_FORMAT);
+        return DateTimeImmutable::createFromFormat(static::DATETIME_ISO8601_UTC_FORMAT, $dateString);
+    }
+
+    /**
+     * @param DateTimeImmutable $date
+     */
+    public static function toUtcString($date)
+    {
+        return $date->format(static::DATETIME_ISO8601_UTC_FORMAT);
     }
 }
