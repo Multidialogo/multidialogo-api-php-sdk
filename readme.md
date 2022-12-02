@@ -46,6 +46,7 @@ The folder must be writable.
 It is totally optional, and it allows to omit user password until it is mandatory (ie until the main or refresh token expires).
 
 It is possibile to pass a token directly to the client.
+This use case is suitable for situation where the login is managed by a frontend, that is handling the token refresh procedure and passing the token to a backend proxy.
 This is done via the ``withBearerToken`` helper method.
 Example:
 
