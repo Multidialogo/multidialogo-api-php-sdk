@@ -62,7 +62,7 @@ class AuthProvider implements AuthProviderInterface
      * @return string
      * @throws Exception
      */
-    public function getToken()
+    public function getToken(): string
     {
         if (!$this->authToken) {
             // try get a token from the storage
@@ -71,7 +71,12 @@ class AuthProvider implements AuthProviderInterface
 
         if (!$this->authToken || !$this->authToken->isValid()) {
             // try refresh the token or - if the refresh fails - issue a full authentication request...
-            if (!$this->refreshToken || !$this->refreshToken->isValid() || !$this->_doRefreshToken()) {
+            if ($this->refreshToken && $this->refreshToken->isValid()) {
+                if (!$this->_doRefreshToken()) {
+                    $this->_doAuthenticate();
+                }
+                return $this->authToken->getToken();
+            } else {
                 $this->_doAuthenticate();
             }
         }
@@ -79,7 +84,7 @@ class AuthProvider implements AuthProviderInterface
         return $this->authToken->getToken();
     }
 
-    private function _doRefreshToken()
+    private function _doRefreshToken(): bool
     {
         try {
             $response = $this->httpClient->post("users/login/refresh",
