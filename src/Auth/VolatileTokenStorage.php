@@ -27,4 +27,10 @@ class VolatileTokenStorage implements TokenStorageInterface
         $this->mainToken = $mainToken;
         $this->refreshToken = $refreshToken;
     }
+
+    function reset($userName)
+    {
+        $this->mainToken = null;
+        $this->refreshToken = null;
+    }
 }

@@ -5,8 +5,8 @@ namespace multidialogo\client;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
-use multidialogo\client\Auth\AuthProvider;
 use multidialogo\client\Auth\AuthProviderInterface;
 use multidialogo\client\Exception\MultidialogoClientException;
 use Psr\Http\Message\ResponseInterface;
@@ -116,9 +116,9 @@ class MultidialogoClient
         try {
             return $this->httpClient->request($method, $url, $this->options);
         } catch (ClientException $e) {
-            $responseBody = $e->getResponse()->getBody()->getContents();
+            $this->authProvider->reset();
 
-            throw new MultidialogoClientException("Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
+            return new Response(401, []);
         } catch (Exception $e) {
             throw new MultidialogoClientException("Request error. {$e->getMessage()}", $e);
         }

@@ -19,4 +19,9 @@ interface TokenStorageInterface
      * @param AuthToken $refreshToken
      */
     function write($userName, $mainToken, $refreshToken);
+
+    /**
+     * @param string $userName
+     */
+    function reset($userName);
 }

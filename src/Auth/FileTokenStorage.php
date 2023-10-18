@@ -75,4 +75,10 @@ class FileTokenStorage implements TokenStorageInterface
     }
 
 
+    function reset($userName)
+    {
+        $fileName = $this->getFileName($userName);
+
+        unlink($fileName);
+    }
 }
