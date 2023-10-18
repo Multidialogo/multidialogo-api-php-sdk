@@ -16,9 +16,9 @@ use multidialogo\client\Auth\AuthProvider;
 use multidialogo\client\Auth\AuthToken;
 use multidialogo\client\Auth\FileTokenStorage;
 use multidialogo\client\Auth\VolatileTokenStorage;
+use multidialogo\client\test\TestUtils\AuthPayloadUtils;
 use multidialogo\client\test\TestUtils\JsonResources;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use function PHPUnit\Framework\assertEquals;
 
 class AuthProviderTest extends TestCase
@@ -109,8 +109,8 @@ json;
         $history = Middleware::history($container);
 
         $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
-        $user1OkResponseObj = $this->setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
-        $user2OkResponseObj = $this->setExpireDatesAtDate($now, self::USER2_OK_RESPONSE);
+        $user1OkResponseObj = AuthPayloadUtils::setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
+        $user2OkResponseObj = AuthPayloadUtils::setExpireDatesAtDate($now, self::USER2_OK_RESPONSE);
 
         $mock = new MockHandler([
             new Response(201, [], json_encode($user1OkResponseObj)),
@@ -174,18 +174,6 @@ json;
         self::assertCount(2, $container);
     }
 
-    private function setExpireDatesAtDate(DateTimeImmutable $startDate, string $tokenPayload): stdClass
-    {
-        $tokenObj = json_decode($tokenPayload);
-        $tokenObj->data->attributes->createdAt = $startDate->format('Y-m-d\TH:i:s\Z');
-        $expireAt = $startDate->add(new DateInterval("PT3H"));
-        $tokenObj->data->attributes->expireAt = $expireAt->format('Y-m-d\TH:i:s\Z');
-        $refreshExpireAt = $startDate->add(new DateInterval("P15D"));
-        $tokenObj->data->attributes->refreshTokenExpireAt = $refreshExpireAt->format('Y-m-d\TH:i:s\Z');
-
-        return $tokenObj;
-    }
-
     public function testShouldCallAuthenticateWhenNoTokenAreStored()
     {
         $user1UserName = 'user1@some_domain.com';
@@ -199,7 +187,7 @@ json;
         $history = Middleware::history($container);
 
         $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
-        $user1OkResponseObj = $this->setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
+        $user1OkResponseObj = AuthPayloadUtils::setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
 
         $mock = new MockHandler([
             new Response(201, [], json_encode($user1OkResponseObj)),
@@ -245,7 +233,7 @@ json;
 
         $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
 
-        $user1OkResponseObj = $this->setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
+        $user1OkResponseObj = AuthPayloadUtils::setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
 
         $mock = new MockHandler([
             new Response(201, [], json_encode($user1OkResponseObj)),
@@ -289,7 +277,7 @@ json;
         $history = Middleware::history($container);
 
         $now = new DateTimeImmutable("now", new DateTimeZone("UTC"));
-        $user1OkResponseObj = $this->setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
+        $user1OkResponseObj = AuthPayloadUtils::setExpireDatesAtDate($now, self::USER1_OK_RESPONSE);
 
         $mock = new MockHandler([
             new Response(201, [], json_encode($user1OkResponseObj)),

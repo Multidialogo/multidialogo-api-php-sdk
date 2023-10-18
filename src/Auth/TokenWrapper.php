@@ -18,4 +18,9 @@ class TokenWrapper implements AuthProviderInterface
     {
         return $this->token;
     }
+
+    public function reset()
+    {
+        $this->token = null;
+    }
 }

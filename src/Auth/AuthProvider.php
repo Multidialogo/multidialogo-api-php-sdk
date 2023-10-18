@@ -178,4 +178,11 @@ class AuthProvider implements AuthProviderInterface
             throw new MultidialogoClientException("Authentication failed. (status code: {$response->getStatusCode()})");
         }
     }
+
+    public function reset()
+    {
+        $this->authToken = null;
+        $this->refreshToken = null;
+        $this->tokenStorage->reset($this->username);
+    }
 }
