@@ -114,7 +114,12 @@ class MultidialogoClient
         }
 
         try {
-            return $this->httpClient->request($method, $url, $this->options);
+            $response = $this->httpClient->request($method, $url, $this->options);
+            if (401 === $response->getStatusCode()) {
+                $this->authProvider->reset();
+            }
+
+            return $response;
         } catch (ClientException $e) {
             $this->authProvider->reset();
 
