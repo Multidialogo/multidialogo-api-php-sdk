@@ -106,15 +106,15 @@ class AuthProvider implements AuthProviderInterface
             );
         } catch (ClientException $e) {
             $responseBody = $e->getResponse()->getBody()->getContents();
-            throw new MultidialogoClientException("Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
+            throw new MultidialogoClientException($e->getResponse(), "Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
         } catch (Exception $e) {
-            throw new MultidialogoClientException("Request error. {$e->getMessage()}", $e);
+            throw new MultidialogoClientException(null, "Request error. {$e->getMessage()}", $e);
         }
 
         if ($response->getStatusCode() === 201) {
             $responseBody = json_decode($response->getBody()->__toString());
             if (!$responseBody) {
-                throw new MultidialogoClientException("Failed to deserialize token refresh response.");
+                throw new MultidialogoClientException($response, "Failed to deserialize token refresh response.");
             }
             $this->_setAuthTokensFromJsonData($responseBody->data->attributes);
             return true;
@@ -163,19 +163,19 @@ class AuthProvider implements AuthProviderInterface
             );
         } catch (ClientException $e) {
             $responseBody = $e->getResponse()->getBody()->getContents();
-            throw new MultidialogoClientException("Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
+            throw new MultidialogoClientException($e->getResponse(), "Request error. Code: {$e->getResponse()->getStatusCode()}, body: {$responseBody}", $e);
         } catch (Exception $e) {
-            throw new MultidialogoClientException("Request error. {$e->getMessage()}", $e);
+            throw new MultidialogoClientException(null, "Request error. {$e->getMessage()}", $e);
         }
 
         if ($response->getStatusCode() === 201) {
             $responseBody = json_decode($response->getBody()->__toString());
             if (!$responseBody) {
-                throw new MultidialogoClientException("Failed to deserialize authentication response.");
+                throw new MultidialogoClientException($response, "Failed to deserialize authentication response.");
             }
             $this->_setAuthTokensFromJsonData($responseBody->data->attributes);
         } else {
-            throw new MultidialogoClientException("Authentication failed. (status code: {$response->getStatusCode()})");
+            throw new MultidialogoClientException($response, "Authentication failed. (status code: {$response->getStatusCode()})");
         }
     }
 
