@@ -5,7 +5,6 @@ namespace multidialogo\client;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use multidialogo\client\Auth\AuthProviderInterface;
 use multidialogo\client\Exception\MultidialogoClientException;
@@ -90,7 +89,7 @@ class MultidialogoClient
     private function _doRequest($method, $url, $queryParams = null, $body = null)
     {
         if (!$this->language) {
-            throw new MultidialogoClientException('Language property not setted!');
+            throw new MultidialogoClientException(null, 'Language property not setted!');
         }
 
         $this->options = [
@@ -123,9 +122,9 @@ class MultidialogoClient
         } catch (ClientException $e) {
             $this->authProvider->reset();
 
-            return new Response(401, []);
+            return $e->getResponse();
         } catch (Exception $e) {
-            throw new MultidialogoClientException("Request error. {$e->getMessage()}", $e);
+            throw new MultidialogoClientException(null, "Request error. {$e->getMessage()}", $e);
         }
     }
 
