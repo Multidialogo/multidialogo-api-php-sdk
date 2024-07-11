@@ -61,17 +61,47 @@ Example:
 ```
 
 
-## How to run unit tests in a docker environment
+## Local development
 
-Install dependencies including dev ones:
+### How to build required docker images
 
+To build the main image (php 7.4)
 ```bash
-docker compose run --rm multidialogo-api-php-sdk-composer composer install
+docker build -f provisioning/Dockerfile-74-composer -t multidialogo-api-php-sdk-composer:latest .
 ```
 
-Run phpunit test suite:
-
+To build the php 8.2 version image (note: it does not contain composer).
 ```bash
-docker compose run --rm multidialogo-api-php-sdk-composer vendor/bin/phpunit .
+docker build -f provisioning/Dockerfile-82-cli -t multidialogo-api-php-sdk-php82:latest .
 ```
 
+Keep in mind that the php82 version is intended to be used only to run unit tests, that's why composer is not included.
+
+### Install/update/manage vendors
+
+```bash
+docker run --rm --interactive --tty -v ${PWD}/:/app multidialogo-api-php-sdk-composer:latest composer <rest of the composer command>
+```
+
+### Run unit tests
+
+Run tests under php 7.4:
+```bash
+docker run --rm --interactive --tty -v ${PWD}/:/app multidialogo-api-php-sdk-composer:latest ./vendor/bin/phpunit -c .
+```
+
+Run tests under php 8.2:
+```bash
+docker run --rm --interactive --tty -v ${PWD}/:/app multidialogo-api-php-sdk-php82:latest ./vendor/bin/phpunit -c .
+```
+
+### Semantic versioning
+
+Project is following semantic versioning.
+Please use properly git tags before any release in master.
+
+Example:
+```bash
+git tag -a v0.0.2 -m "Bugfix"
+git push --follow-tags
+```
