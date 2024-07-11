@@ -1,5 +1,0 @@
-services:
-  multidialogo-api-php-sdk-composer:
-    image: composer:2.3
-    volumes:
-      - .:/app
